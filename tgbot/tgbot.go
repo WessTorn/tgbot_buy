@@ -17,33 +17,41 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 	for update := range bot.GetUpdatesChan(updateConfig) {
 		if update.Message != nil {
 			if update.Message.Text == "/start" {
-				ShowServersMenu(bot, db, update.Message.Chat.ID)
+				ShowServers(bot, db, update.Message.Chat.ID)
 				continue
 			}
+
+			var user *database.Context
+			user, err := database.CtxGetUserData(db, update.Message.Chat.ID)
+			if err != nil {
+				logger.Log.Debugf("(CtxGetUserData) ERROR: %v", err)
+				ShowServers(bot, db, update.Message.Chat.ID)
+				continue
+			}
+
+			switch user.Stage {
+			case database.PrivilegeStg:
+				HandlerSteam(bot, db, update, user)
+			case database.PrlgNickStg:
+				HandlerNick(bot, db, update, user)
+			}
+
 		} else if update.CallbackQuery != nil {
 			var user *database.Context
 			user, err := database.CtxGetUserData(db, update.CallbackQuery.Message.Chat.ID)
 			if err != nil {
 				logger.Log.Debugf("(CtxGetUserData) ERROR: %v", err)
-				ShowServersMenu(bot, db, update.CallbackQuery.Message.Chat.ID)
+				ShowServers(bot, db, update.CallbackQuery.Message.Chat.ID)
 				continue
 			}
 
 			switch user.Stage {
-			case database.ServerStage:
-				logger.Log.Debugf("%v", user)
-				// Respond to the callback query, telling Telegram to show the user
-				// a message with the data received.
-				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
-				if _, err := bot.Request(callback); err != nil {
-					panic(err)
-				}
-
-				// And finally, send a message containing the data received.
-				msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
-				if _, err := bot.Send(msg); err != nil {
-					panic(err)
-				}
+			case database.ServerStg:
+				HandlerServers(bot, db, update, user)
+			case database.ServiceStg:
+				HandlerService(bot, db, update, user)
+			case database.PrivilegeStg:
+				HandlerPrivileges(bot, db, update, user)
 			}
 
 		}

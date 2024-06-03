@@ -1,14 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"tg_cs/database"
+	"tg_cs/get_data"
 	"tg_cs/logger"
 	"tg_cs/tgbot"
 )
 
 func main() {
 	logger.InitLogger()
+
+	fmt.Println(database.PrivilegeStg)
+
+	get_data.ReadPrivilege()
 
 	db, err := database.ConnectDB()
 	if err != nil {
