@@ -4,7 +4,6 @@ Telegram-бот для покупок привилегий, для сервер�
 # Проект находится на стадии разработки.
 
 # bot
-https://miro.com/welcome/TUxlTDB3SThMajhrcHUxQXh5SGxmSUJQYUt5NTI0Qkt2MldwOWZIWnZybkczVDl0Y202WDlINUtNbUUyYTFNN3wzNDU4NzY0NTkxMDIzNTUxMTE2fDQ=?share_link_id=991674810859
 
 ## lib
 
