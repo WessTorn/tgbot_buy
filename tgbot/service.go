@@ -2,8 +2,8 @@ package tgbot
 
 import (
 	"database/sql"
-	"strconv"
 	"tg_cs/database"
+	"tg_cs/get_data"
 	"tg_cs/logger"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -23,25 +23,23 @@ func ShowService(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 }
 
 func HandlerService(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("(HandlerService) User %d", update.CallbackQuery.Message.Chat.ID)
+	chatID := update.Message.Chat.ID
+	logger.Log.Debugf("(HandlerService) User %d", chatID)
+	serviceName := update.Message.Text
 
-	// Respond to the callback query, telling Telegram to show the user
-	// a message with the data received.
-	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
-	_, err := bot.Request(callback)
+	service, err := get_data.GetServiceFromName(serviceName)
 	if err != nil {
-		logger.Log.Fatalf("(Request) %v", err)
+		ShowService(bot, db, chatID)
+		return
 	}
 
-	service, err := strconv.Atoi(update.CallbackQuery.Data)
-	if err != nil {
-		logger.Log.Fatalf("(Atoi) %v", err)
-	}
-
-	err = database.CtxUpdateUserService(db, update.CallbackQuery.Message.Chat.ID, service)
+	err = database.CtxUpdateUserService(db, chatID, service.ID)
 	if err != nil {
 		logger.Log.Fatalf("(CtxUpdateUserService) %v", err)
 	}
 
-	ShowPrivileges(bot, db, update.CallbackQuery.Message.Chat.ID)
+	switch service.ID {
+	case 1:
+		ShowPrivileges(bot, db, chatID)
+	}
 }

@@ -2,43 +2,53 @@ package tgbot
 
 import (
 	"database/sql"
-	"strconv"
 	"tg_cs/database"
 	"tg_cs/get_data"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func GetTeamButtons(bot *tgbotapi.BotAPI, db *sql.DB) tgbotapi.InlineKeyboardMarkup {
+func GetTeamButtons(bot *tgbotapi.BotAPI, db *sql.DB) tgbotapi.ReplyKeyboardMarkup {
 	servers := database.GetServers(db)
 
-	var buttons [][]tgbotapi.InlineKeyboardButton
+	var buttons [][]tgbotapi.KeyboardButton
 	for _, server := range servers {
-		serverID := strconv.Itoa(server.ID)
-		button := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(server.Name, serverID))
+		button := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(server.Name))
 		buttons = append(buttons, button)
 	}
 
-	return tgbotapi.NewInlineKeyboardMarkup(buttons...)
+	return tgbotapi.NewReplyKeyboard(buttons...)
 }
 
-func GetServiceButtons(bot *tgbotapi.BotAPI) tgbotapi.InlineKeyboardMarkup {
-	var buttons [][]tgbotapi.InlineKeyboardButton
-	button := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Покупка привилегии", "1"))
-	buttons = append(buttons, button)
-	return tgbotapi.NewInlineKeyboardMarkup(buttons...)
+func GetServicesButtons(bot *tgbotapi.BotAPI) tgbotapi.ReplyKeyboardMarkup {
+	services := get_data.GetServices()
+
+	var buttons [][]tgbotapi.KeyboardButton
+
+	for _, service := range services {
+		button := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(service))
+		buttons = append(buttons, button)
+	}
+
+	buttonBack := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Вернуться назад"))
+	buttons = append(buttons, buttonBack)
+
+	return tgbotapi.NewReplyKeyboard(buttons...)
 }
 
-func GetPrivilegesButton(bot *tgbotapi.BotAPI) tgbotapi.InlineKeyboardMarkup {
+func GetPrivilegesButton(bot *tgbotapi.BotAPI) tgbotapi.ReplyKeyboardMarkup {
 	privileges := get_data.GetPrivileges()
 
-	var buttons [][]tgbotapi.InlineKeyboardButton
+	var buttons [][]tgbotapi.KeyboardButton
 	for _, privilege := range privileges.Privilege {
-		prlgID := strconv.Itoa(privilege.ID)
-		button := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(privilege.Name, prlgID))
+		button := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(privilege.Name))
 		buttons = append(buttons, button)
 	}
-	return tgbotapi.NewInlineKeyboardMarkup(buttons...)
+
+	buttonBack := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Вернуться назад"))
+	buttons = append(buttons, buttonBack)
+
+	return tgbotapi.NewReplyKeyboard(buttons...)
 }
 
 func GetBackButton(bot *tgbotapi.BotAPI) tgbotapi.ReplyKeyboardMarkup {

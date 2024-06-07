@@ -2,7 +2,9 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"log"
+	"tg_cs/logger"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -27,6 +29,19 @@ func GetServers(db *sql.DB) []Server {
 	return servers
 }
 
+func GetServerFromName(db *sql.DB, serverName string) (Server, error) {
+	var server Server
+	sqlReq := "SELECT id, hostname, address FROM amx_serverinfo WHERE hostname = ?"
+	err := db.QueryRow(sqlReq, serverName).Scan(&server.ID, &server.Name, &server.IP)
+	if err == sql.ErrNoRows {
+		return server, errors.New("ServerNotFound")
+	} else if err != nil {
+		logger.Log.Fatalf("(%s): %v", sqlReq, err)
+	}
+
+	return server, nil
+}
+
 func GetServerFromId(db *sql.DB, serverID int) Server {
 	var server Server
 	rows, err := db.Query("SELECT id, hostname, address FROM amx_serverinfo WHERE id = ?", serverID)
@@ -48,12 +63,12 @@ func GetServerFromId(db *sql.DB, serverID int) Server {
 func SetAdminServer(db *sql.DB, user *Context) {
 	sqlReq := "INSERT INTO amx_amxadmins (username, password, access, flags, steamid, nickname, ashow, expired, days ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err := db.Exec(sqlReq,
-		user.Nick.String,
+		user.Prvg.Nick.String,
 		"",
 		"abcdefghijklmnopqrstuv",
 		"ce",
-		user.SteamID.String,
-		user.Nick.String,
+		user.Prvg.SteamID.String,
+		user.Prvg.Nick.String,
 		"1",
 		0,
 		0,
@@ -76,7 +91,7 @@ func SetAdminServer(db *sql.DB, user *Context) {
 
 func GetAdminID(db *sql.DB, user *Context) int {
 	var adminID int
-	rows, err := db.Query("SELECT id FROM amx_amxadmins WHERE steamid = ?", user.SteamID.String)
+	rows, err := db.Query("SELECT id FROM amx_amxadmins WHERE steamid = ?", user.Prvg.SteamID.String)
 	if err != nil {
 		log.Fatal(err)
 	}

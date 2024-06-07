@@ -2,8 +2,9 @@ package tgbot
 
 import (
 	"database/sql"
-	"strconv"
 	"tg_cs/database"
+	"tg_cs/game"
+	"tg_cs/get_data"
 	"tg_cs/logger"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -24,27 +25,27 @@ func ShowPrivileges(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 }
 
 func HandlerPrivileges(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("(HandlerPrivileges) User %d", update.CallbackQuery.Message.Chat.ID)
+	chatID := update.Message.Chat.ID
+	logger.Log.Debugf("(HandlerPrivileges) User %d", chatID)
+	privilegeName := update.Message.Text
 
-	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
-	_, err := bot.Request(callback)
+	privilege, err := get_data.GetPrivilegeFromName(privilegeName)
 	if err != nil {
-		logger.Log.Fatalf("(Request) %v", err)
+		ShowPrivileges(bot, db, chatID)
+		return
 	}
 
-	privilegeID, err := strconv.Atoi(update.CallbackQuery.Data)
+	err = database.CtxInitUserPrvg(db, chatID, privilege.ID)
 	if err != nil {
-		logger.Log.Fatalf("(Atoi) %v", err)
+		logger.Log.Fatalf("(CtxInitUserPrvg) %v", err)
 	}
 
-	err = database.CtxUpdateUserPrivilege(db, update.CallbackQuery.Message.Chat.ID, privilegeID)
-	if err != nil {
-		logger.Log.Fatalf("(CtxUpdateUserSteamID) %v", err)
-	}
-
-	ShowSteam(bot, db, update.CallbackQuery.Message.Chat.ID)
-
+	ShowSteam(bot, db, chatID)
 }
+
+// func ShowPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64, privilegeID int64) {
+
+// }
 
 func ShowSteam(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 	logger.Log.Debugf("(ShowSteam) User %d", chatID)
@@ -59,20 +60,28 @@ func ShowSteam(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 	}
 }
 
-func HandlerSteam(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("(HandlerSteam) User %d", update.Message.Chat.ID)
+func HandlerSteam(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update) {
+	chatID := update.Message.Chat.ID
+	logger.Log.Debugf("(HandlerSteam) User %d", chatID)
+	steamID := update.Message.Text
 
-	err := database.CtxUpdateUserSteamID(db, update.Message.Chat.ID, update.Message.Text)
+	if !game.IsSteamIDValid(steamID) {
+		ShowSteam(bot, db, chatID)
+		return
+	}
+
+	err := database.CtxUpdateUserPrvgSteamID(db, chatID, steamID)
 	if err != nil {
 		logger.Log.Fatalf("(CtxUpdateUserSteamID) %v", err)
 	}
 
-	ShowNick(bot, db, update.Message.Chat.ID)
+	ShowNick(bot, db, chatID)
 
 }
 
 func ShowNick(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 	logger.Log.Debugf("(ShowNick) User %d", chatID)
+
 	err := NickMsg(bot, chatID)
 	if err != nil {
 		logger.Log.Fatalf("(NickMsg) %v", err)
@@ -85,19 +94,20 @@ func ShowNick(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 }
 
 func HandlerNick(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("%v", user)
-	logger.Log.Debugf("(HandlerNick) User %d", update.Message.Chat.ID)
+	chatID := update.Message.Chat.ID
+	logger.Log.Debugf("(HandlerNick) User %d", chatID)
+	nick := update.Message.Text
 
-	err := database.CtxUpdateUserNick(db, update.Message.Chat.ID, update.Message.Text)
+	err := database.CtxUpdateUserPrvgNick(db, chatID, nick)
 	if err != nil {
 		logger.Log.Fatalf("(CtxUpdateUserSteamID) %v", err)
 	}
 
-	user.Nick.String = update.Message.Text
+	user.Prvg.Nick.String = update.Message.Text
 
 	database.SetAdminServer(db, user)
 
-	err = PrivilegeMsg(bot, user.ChatID)
+	err = PrivilegeMsg(bot, user.Prvg.ChatID)
 	if err != nil {
 		logger.Log.Fatalf("(PrivilegeMsg) %v", err)
 	}

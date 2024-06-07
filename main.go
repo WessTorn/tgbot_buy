@@ -36,6 +36,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = database.СtxPrvgCreate(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	logger.Log.Info("Context created")
 
 	bot, err := tgbot.InitTGBot()

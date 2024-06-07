@@ -6,8 +6,15 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+func WelcomeMsg(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) error {
+	msg := tgbotapi.NewMessage(chatID, "Привет!")
+	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+	_, err := bot.Send(msg)
+	return err
+}
+
 func ServersMsg(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) error {
-	msg := tgbotapi.NewMessage(chatID, "Привет!\nВыберите сервер:")
+	msg := tgbotapi.NewMessage(chatID, "Выберите сервер:")
 	msg.ReplyMarkup = GetTeamButtons(bot, db)
 	_, err := bot.Send(msg)
 	return err
@@ -15,7 +22,7 @@ func ServersMsg(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) error {
 
 func ServiceMsg(bot *tgbotapi.BotAPI, chatID int64) error {
 	msg := tgbotapi.NewMessage(chatID, "Выберите услугу:")
-	msg.ReplyMarkup = GetServiceButtons(bot)
+	msg.ReplyMarkup = GetServicesButtons(bot)
 	_, err := bot.Send(msg)
 	return err
 }

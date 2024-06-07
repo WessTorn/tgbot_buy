@@ -2,52 +2,59 @@ package tgbot
 
 import (
 	"database/sql"
-	"strconv"
 	"tg_cs/database"
 	"tg_cs/logger"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func ShowServers(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
-	logger.Log.Debugf("(showServerMenu) User %d", chatID)
-	err := ServersMsg(bot, db, chatID)
+func ShowServersWelcome(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
+	logger.Log.Debugf("(ShowServersWelcome) User %d", chatID)
+	err := WelcomeMsg(bot, db, chatID)
 	if err != nil {
-		logger.Log.Fatalf("(ServersMsg) %v", err)
+		logger.Log.Fatalf("(WelcomeMsg) %v", err)
 	}
 
 	err = database.CtxInitUser(db, chatID)
 	if err != nil {
 		logger.Log.Fatalf("(CtxInitUser) %v", err)
 	}
+
+	ShowServers(bot, db, chatID)
+}
+
+func ShowServers(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
+	logger.Log.Debugf("(ShowServers) User %d", chatID)
+	err := ServersMsg(bot, db, chatID)
+	if err != nil {
+		logger.Log.Fatalf("(ServersMsg) %v", err)
+	}
+
+	err = database.CtxUpdateStage(db, chatID, database.ServerStg)
+	if err != nil {
+		logger.Log.Fatalf("(CtxUpdateStage) %v", err)
+	}
 }
 
 func HandlerServers(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("(HandlerServersMenu) User %d", update.CallbackQuery.Message.Chat.ID)
+	logger.Log.Debugf("(HandlerServersMenu) User %d", update.Message.Chat.ID)
 
-	// Respond to the callback query, telling Telegram to show the user
-	// a message with the data received.
-	callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
-	_, err := bot.Request(callback)
+	chatID := update.Message.Chat.ID
+	serverName := update.Message.Text
+
+	server, err := database.GetServerFromName(db, serverName)
 	if err != nil {
-		logger.Log.Fatalf("(Request) %v", err)
+		ShowServers(bot, db, chatID)
+		return
 	}
 
-	serverId, err := strconv.Atoi(update.CallbackQuery.Data)
-	if err != nil {
-		logger.Log.Fatalf("(Atoi) %v", err)
-	}
+	user.ChatID = chatID
+	user.ServerID.Int64 = server.ID
 
-	err = database.CtxUpdateUserServer(db, update.CallbackQuery.Message.Chat.ID, serverId)
+	err = database.CtxUpdateUserServer(db, user)
 	if err != nil {
 		logger.Log.Fatalf("(CtxUpdateUserServer) %v", err)
 	}
 
-	ShowService(bot, db, update.CallbackQuery.Message.Chat.ID)
-
-	// // And finally, send a message containing the data received.
-	// msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
-	// if _, err := bot.Send(msg); err != nil {
-	// 	panic(err)
-	// }
+	ShowService(bot, db, chatID)
 }

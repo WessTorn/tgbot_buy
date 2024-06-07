@@ -2,12 +2,14 @@ package get_data
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
+	"strings"
 	"tg_cs/logger"
 )
 
 type Privilege struct {
-	ID          int
+	ID          int64
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Cost        []struct {
@@ -34,6 +36,25 @@ func ReadPrivilege() {
 		logger.Log.Fatalf("(Unmarshal) %v", err)
 		return
 	}
+}
+
+func GetPrivilegeFromName(privilegeName string) (Privilege, error) {
+	var out Privilege
+
+	var check bool = false
+	for _, privilege := range privileges.Privilege {
+		if strings.EqualFold(privilegeName, privilege.Name) {
+			out = privilege
+			check = true
+			break
+		}
+	}
+
+	if !check {
+		return out, errors.New("PrivilegeNotFound")
+	}
+
+	return out, nil
 }
 
 func GetPrivileges() Privileges {
