@@ -10,24 +10,24 @@ import (
 )
 
 func SetAdminServer(db *sql.DB, user *Context) {
-	privelege, err := get_data.GetPrivilegeFromID(user.Prvg.PrivilegeID.Int64)
+	privelege, err := get_data.GetPrivilegeFromID(user.Privilege.PrvgID.Int64)
 	if err != nil {
 		logger.Log.Fatalf("(GetPrivilegeFromID) %v", err)
 	}
 
 	nowTime := time.Now().Unix()
-	day := get_data.GetDayFromCostID(privelege, user.Prvg.CostID.Int64)
+	day := get_data.GetDayFromCostID(privelege, user.Privilege.CostID.Int64)
 	daysToAdd := day * 24 * 60 * 60
 	futureTime := nowTime + int64(daysToAdd)
 
 	sqlReq := "INSERT INTO amx_amxadmins (username, password, access, flags, steamid, nickname, ashow, created, expired, days ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err = db.Exec(sqlReq,
-		user.Prvg.Nick.String,
+		user.Privilege.Nick.String,
 		"",
 		privelege.Flags,
 		"ce",
-		user.Prvg.SteamID.String,
-		user.Prvg.Nick.String,
+		user.Privilege.SteamID.String,
+		user.Privilege.Nick.String,
 		"1",
 		nowTime,
 		futureTime,
@@ -55,7 +55,7 @@ func SetAdminServer(db *sql.DB, user *Context) {
 
 func GetAdminID(db *sql.DB, user *Context) int {
 	var adminID int
-	rows, err := db.Query("SELECT id FROM amx_amxadmins WHERE steamid = ?", user.Prvg.SteamID.String)
+	rows, err := db.Query("SELECT id FROM amx_amxadmins WHERE steamid = ?", user.Privilege.SteamID.String)
 	if err != nil {
 		log.Fatal(err)
 	}

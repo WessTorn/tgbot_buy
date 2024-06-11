@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"tg_cs/config"
 	"tg_cs/database"
 	"tg_cs/get_data"
 	"tg_cs/logger"
@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	logger.InitLogger()
+	config.InitConfig()
 
-	fmt.Println(database.PrivilegeStg)
+	logger.InitLogger()
 
 	get_data.ReadPrivilege()
 

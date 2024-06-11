@@ -2,14 +2,15 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"tg_cs/config"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// "username:password@tcp(127.0.0.1:3306)/dbname"
-
 func ConnectDB() (*sql.DB, error) {
-	return sql.Open("mysql", "username:password@tcp(127.0.0.1:3306)/dbname")
+	text := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", config.DBUser(), config.DBPass(), config.DBHost(), config.DBDatabase())
+	return sql.Open("mysql", text)
 }
 
 func PingDB(db *sql.DB) error {

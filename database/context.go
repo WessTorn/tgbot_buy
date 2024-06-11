@@ -152,7 +152,7 @@ func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
 
 	row := db.QueryRow("SELECT chat_id, privilege_id, cost_id, steam_id, nick FROM tgbot_ctx_privilege WHERE chat_id = ?", chatID)
 
-	err := row.Scan(&userPrlg.ChatID, &userPrlg.PrivilegeID, &userPrlg.CostID, &userPrlg.SteamID, &userPrlg.Nick)
+	err := row.Scan(&userPrlg.ChatID, &userPrlg.PrvgID, &userPrlg.CostID, &userPrlg.SteamID, &userPrlg.Nick)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return userPrlg, fmt.Errorf("user with chat_id %d not found", chatID)

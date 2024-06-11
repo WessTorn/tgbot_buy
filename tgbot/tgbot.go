@@ -2,6 +2,7 @@ package tgbot
 
 import (
 	"database/sql"
+	"tg_cs/config"
 	"tg_cs/database"
 	"tg_cs/logger"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func InitTGBot() (*tgbotapi.BotAPI, error) {
-	return tgbotapi.NewBotAPI("")
+	return tgbotapi.NewBotAPI(config.BotToken())
 }
 
 func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
@@ -33,7 +34,7 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 			}
 
 			if user.Stage >= database.PrvgDaysStg && user.Stage <= database.PrlgNickStg {
-				user.Prvg, err = database.CtxGetUserPrvgData(db, chatID)
+				user.Privilege, err = database.CtxGetUserPrvgData(db, chatID)
 				if err != nil {
 					logger.Log.Debugf("(CtxGetUserPrvgData) ERROR: %v", err)
 					ShowPrivileges(bot, db, chatID)
@@ -77,7 +78,7 @@ func BackButton(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *
 	case database.PrvgDaysStg:
 		ShowPrivileges(bot, db, chatID)
 	case database.PrlgSteamStg:
-		ShowPrivilegesDays(bot, db, chatID, user.Prvg.PrivilegeID.Int64)
+		ShowPrivilegesDays(bot, db, chatID, user.Privilege.PrvgID.Int64)
 	case database.PrlgNickStg:
 		ShowSteam(bot, db, chatID)
 	}

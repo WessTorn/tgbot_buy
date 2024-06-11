@@ -14,12 +14,12 @@ const (
 )
 
 type ContextPrlg struct {
-	ID          int
-	ChatID      int64
-	PrivilegeID sql.NullInt64
-	CostID      sql.NullInt64
-	SteamID     sql.NullString
-	Nick        sql.NullString
+	ID      int
+	ChatID  int64
+	PrvgID  sql.NullInt64
+	CostID  sql.NullInt64
+	SteamID sql.NullString
+	Nick    sql.NullString
 }
 
 type Context struct {
@@ -28,7 +28,7 @@ type Context struct {
 	Stage     Stage
 	ServerID  sql.NullInt64
 	ServiceID sql.NullInt64
-	Prvg      ContextPrlg
+	Privilege ContextPrlg
 }
 
 type Server struct {

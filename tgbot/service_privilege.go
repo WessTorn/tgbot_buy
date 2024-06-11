@@ -40,7 +40,6 @@ func HandlerPrivileges(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update,
 		logger.Log.Fatalf("(CtxInitUserPrvg) %v", err)
 	}
 
-	//ShowSteam(bot, db, chatID)
 	ShowPrivilegesDays(bot, db, chatID, privilege.ID)
 }
 
@@ -69,7 +68,7 @@ func HandlerPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Upd
 	logger.Log.Debugf("(HandlerPrivilegesDays) User %d (%v)", chatID, user)
 	text := update.Message.Text
 
-	privilege, err := get_data.GetPrivilegeFromID(user.Prvg.PrivilegeID.Int64)
+	privilege, err := get_data.GetPrivilegeFromID(user.Privilege.PrvgID.Int64)
 	if err != nil {
 		logger.Log.Debugf("(GetPrivilegeFromID) User %v", err)
 		ShowPrivileges(bot, db, chatID)
@@ -79,7 +78,7 @@ func HandlerPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Upd
 	costID, err := get_data.GetCostIDFromString(privilege, text)
 	if err != nil {
 		logger.Log.Debugf("(GetCostIDFromString) User %v", err)
-		ShowPrivilegesDays(bot, db, chatID, user.Prvg.PrivilegeID.Int64)
+		ShowPrivilegesDays(bot, db, chatID, user.Privilege.PrvgID.Int64)
 		return
 	}
 
@@ -147,11 +146,11 @@ func HandlerNick(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user 
 		logger.Log.Fatalf("(CtxUpdateUserSteamID) %v", err)
 	}
 
-	user.Prvg.Nick.String = update.Message.Text
+	user.Privilege.Nick.String = update.Message.Text
 
 	database.SetAdminServer(db, user)
 
-	err = PrivilegeMsg(bot, user.Prvg.ChatID)
+	err = PrivilegeMsg(bot, user.Privilege.ChatID)
 	if err != nil {
 		logger.Log.Fatalf("(PrivilegeMsg) %v", err)
 	}
