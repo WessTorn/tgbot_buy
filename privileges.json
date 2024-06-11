@@ -1,20 +1,23 @@
 {
   "privileges": [
     {
+      "id": 1,
       "name": "Админ",
       "description": "Администратору доступно:\n- Банить/Кикать игроков.\n- Менять игрокам команды.",
-      "flags": "abcdefghijklmnopqrstuv",
+      "flags": "bcdefijmu",
       "cost": [
-        {"days": 15, "price": 200},
-        {"days": 30, "price": 400}
+        {"cost_id": 1, "day": 15, "price": 200},
+        {"cost_id": 2, "day": 30, "price": 400}
       ]
     },
     {
+      "id": 2,
       "name": "Вип",
       "description": "Випам доступно:\n- Вип модели\n- Вип меню.\n- Префикс",
+      "flags": "fm",
       "cost": [
-        {"days": 15, "price": 100},
-        {"days": 30, "price": 200}
+        {"cost_id": 1, "day": 15, "price": 100},
+        {"cost_id": 2, "day": 30, "price": 200}
       ]
     }
   ]

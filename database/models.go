@@ -8,6 +8,7 @@ const (
 	ServerStg Stage = iota + 1
 	ServiceStg
 	PrivilegeStg
+	PrvgDaysStg
 	PrlgSteamStg
 	PrlgNickStg
 )
@@ -16,6 +17,7 @@ type ContextPrlg struct {
 	ID          int
 	ChatID      int64
 	PrivilegeID sql.NullInt64
+	CostID      sql.NullInt64
 	SteamID     sql.NullString
 	Nick        sql.NullString
 }
@@ -33,4 +35,5 @@ type Server struct {
 	ID   int64
 	Name string
 	IP   string
+	Rcon string
 }

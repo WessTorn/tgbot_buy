@@ -40,12 +40,56 @@ func HandlerPrivileges(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update,
 		logger.Log.Fatalf("(CtxInitUserPrvg) %v", err)
 	}
 
-	ShowSteam(bot, db, chatID)
+	//ShowSteam(bot, db, chatID)
+	ShowPrivilegesDays(bot, db, chatID, privilege.ID)
 }
 
-// func ShowPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64, privilegeID int64) {
+func ShowPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64, privilegeID int64) {
+	logger.Log.Debugf("(ShowPrivilegesDays) User %d", chatID)
 
-// }
+	privilege, err := get_data.GetPrivilegeFromID(privilegeID)
+	if err != nil {
+		ShowPrivileges(bot, db, chatID)
+		return
+	}
+
+	err = PrivilegesDaysMsg(bot, chatID, privilege)
+	if err != nil {
+		logger.Log.Fatalf("(PrivilegesDaysMsg) %v", err)
+	}
+
+	err = database.CtxUpdateStage(db, chatID, database.PrvgDaysStg)
+	if err != nil {
+		logger.Log.Fatalf("(CtxUpdateStage) %v", err)
+	}
+}
+
+func HandlerPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
+	chatID := update.Message.Chat.ID
+	logger.Log.Debugf("(HandlerPrivilegesDays) User %d (%v)", chatID, user)
+	text := update.Message.Text
+
+	privilege, err := get_data.GetPrivilegeFromID(user.Prvg.PrivilegeID.Int64)
+	if err != nil {
+		logger.Log.Debugf("(GetPrivilegeFromID) User %v", err)
+		ShowPrivileges(bot, db, chatID)
+		return
+	}
+
+	costID, err := get_data.GetCostIDFromString(privilege, text)
+	if err != nil {
+		logger.Log.Debugf("(GetCostIDFromString) User %v", err)
+		ShowPrivilegesDays(bot, db, chatID, user.Prvg.PrivilegeID.Int64)
+		return
+	}
+
+	err = database.CtxUpdateUserPrvgCostID(db, chatID, costID)
+	if err != nil {
+		logger.Log.Fatalf("(CtxUpdateUserPrvgCostID) %v", err)
+	}
+
+	ShowSteam(bot, db, chatID)
+}
 
 func ShowSteam(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
 	logger.Log.Debugf("(ShowSteam) User %d", chatID)

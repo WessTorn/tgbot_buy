@@ -32,7 +32,7 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 				continue
 			}
 
-			if user.Stage >= database.PrlgSteamStg && user.Stage <= database.PrlgNickStg {
+			if user.Stage >= database.PrvgDaysStg && user.Stage <= database.PrlgNickStg {
 				user.Prvg, err = database.CtxGetUserPrvgData(db, chatID)
 				if err != nil {
 					logger.Log.Debugf("(CtxGetUserPrvgData) ERROR: %v", err)
@@ -54,6 +54,8 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 				HandlerService(bot, db, update, user)
 			case database.PrivilegeStg:
 				HandlerPrivileges(bot, db, update, user)
+			case database.PrvgDaysStg:
+				HandlerPrivilegesDays(bot, db, update, user)
 			case database.PrlgSteamStg:
 				HandlerSteam(bot, db, update)
 			case database.PrlgNickStg:
@@ -72,8 +74,10 @@ func BackButton(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *
 		ShowServers(bot, db, chatID)
 	case database.PrivilegeStg:
 		ShowService(bot, db, chatID)
-	case database.PrlgSteamStg:
+	case database.PrvgDaysStg:
 		ShowPrivileges(bot, db, chatID)
+	case database.PrlgSteamStg:
+		ShowPrivilegesDays(bot, db, chatID, user.Prvg.PrivilegeID.Int64)
 	case database.PrlgNickStg:
 		ShowSteam(bot, db, chatID)
 	}

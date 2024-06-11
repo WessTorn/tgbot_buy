@@ -25,6 +25,7 @@ func СtxPrvgCreate(db *sql.DB) error {
 			id INT(11) NOT NULL auto_increment PRIMARY KEY,
 			chat_id INT(11) NULL DEFAULT NULL,
 			privilege_id INT(11) NULL DEFAULT NULL,
+			cost_id INT(11) NULL DEFAULT NULL,
 			steam_id VARCHAR(24) NULL DEFAULT NULL,
 			nick VARCHAR(24) NULL DEFAULT NULL
 		);
@@ -149,9 +150,9 @@ func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
 	logger.Log.Debug("(CtxGetUserPrvgData)")
 	var userPrlg ContextPrlg
 
-	row := db.QueryRow("SELECT chat_id, privilege_id, steam_id, nick FROM tgbot_ctx_privilege WHERE chat_id = ?", chatID)
+	row := db.QueryRow("SELECT chat_id, privilege_id, cost_id, steam_id, nick FROM tgbot_ctx_privilege WHERE chat_id = ?", chatID)
 
-	err := row.Scan(&userPrlg.ChatID, &userPrlg.PrivilegeID, &userPrlg.SteamID, &userPrlg.Nick)
+	err := row.Scan(&userPrlg.ChatID, &userPrlg.PrivilegeID, &userPrlg.CostID, &userPrlg.SteamID, &userPrlg.Nick)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return userPrlg, fmt.Errorf("user with chat_id %d not found", chatID)
@@ -160,6 +161,18 @@ func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
 	}
 
 	return userPrlg, nil
+}
+
+func CtxUpdateUserPrvgCostID(db *sql.DB, chatID int64, costID int64) error {
+	logger.Log.Debug("(CtxUpdateUserPrvgCostID)")
+
+	sqlReq := "UPDATE tgbot_ctx_privilege SET cost_id = ? WHERE chat_id = ?"
+	_, err := db.Exec(sqlReq, costID, chatID)
+	if err != nil {
+		return fmt.Errorf("(%s): %v", sqlReq, err)
+	}
+
+	return nil
 }
 
 func CtxUpdateUserPrvgSteamID(db *sql.DB, chatID int64, steamID string) error {
