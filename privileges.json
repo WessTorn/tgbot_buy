@@ -5,9 +5,9 @@
       "name": "Админ",
       "description": "Администратору доступно:\n- Банить/Кикать игроков.\n- Менять игрокам команды.",
       "flags": "bcdefijmu",
-      "cost": [
-        {"cost_id": 1, "day": 15, "price": 200},
-        {"cost_id": 2, "day": 30, "price": 400}
+      "days": [
+        {"day_id": 1, "day": 15, "price": 200},
+        {"day_id": 2, "day": 30, "price": 400}
       ]
     },
     {
@@ -15,9 +15,9 @@
       "name": "Вип",
       "description": "Випам доступно:\n- Вип модели\n- Вип меню.\n- Префикс",
       "flags": "fm",
-      "cost": [
-        {"cost_id": 1, "day": 15, "price": 100},
-        {"cost_id": 2, "day": 30, "price": 200}
+      "days": [
+        {"day_id": 1, "day": 15, "price": 100},
+        {"day_id": 2, "day": 30, "price": 200}
       ]
     }
   ]

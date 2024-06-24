@@ -15,11 +15,11 @@ type Privilege struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Flags       string `json:"flags"`
-	Cost        []struct {
-		CostID int64 `json:"cost_id"`
-		Day    int   `json:"day"`
-		Price  int   `json:"price"`
-	} `json:"cost"`
+	Days        []struct {
+		DayID int64 `json:"day_id"`
+		Day   int   `json:"day"`
+		Price int   `json:"price"`
+	} `json:"days"`
 }
 
 type Privileges struct {
@@ -81,7 +81,7 @@ func GetPrivilegeFromID(privilegeID int64) (Privilege, error) {
 	return out, nil
 }
 
-func GetCostIDFromString(privilege Privilege, buttonName string) (int64, error) {
+func GetDayIDFromString(privilege Privilege, buttonName string) (int64, error) {
 	numbers := strings.Split(buttonName, " ")
 
 	day, err := strconv.Atoi(numbers[0])
@@ -89,28 +89,28 @@ func GetCostIDFromString(privilege Privilege, buttonName string) (int64, error) 
 		return 0, err
 	}
 
-	costID, err := getCostIDFromDay(privilege, day)
+	dayID, err := getDayIDFromDay(privilege, day)
 	if err != nil {
 		return 0, err
 	}
 
-	return costID, nil
+	return dayID, nil
 }
 
-func getCostIDFromDay(privilege Privilege, day int) (int64, error) {
-	for _, cost := range privilege.Cost {
-		if cost.Day == day {
-			return cost.CostID, nil
+func getDayIDFromDay(privilege Privilege, day int) (int64, error) {
+	for _, days := range privilege.Days {
+		if days.Day == day {
+			return days.DayID, nil
 		}
 	}
 
-	return 0, errors.New("CostIDNotFound")
+	return 0, errors.New("DayIDNotFound")
 }
 
-func GetDayFromCostID(privilege Privilege, costID int64) int {
-	for _, cost := range privilege.Cost {
-		if costID == cost.CostID {
-			return cost.Day
+func GetDayFromDayID(privilege Privilege, DayID int64) int {
+	for _, days := range privilege.Days {
+		if DayID == days.DayID {
+			return days.Day
 		}
 	}
 

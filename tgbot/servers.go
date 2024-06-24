@@ -44,7 +44,12 @@ func HandlerServers(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, us
 
 	server, err := database.GetServerFromName(db, serverName)
 	if err != nil {
-		ShowServers(bot, db, chatID)
+		if err.Error() == "ServerNotFound" {
+			err := BadButtonMsg(bot, db, user)
+			if err != nil {
+				logger.Log.Fatalf("(BadButtonMsg) %v", err)
+			}
+		}
 		return
 	}
 

@@ -11,9 +11,10 @@ import (
 
 func GetServers(db *sql.DB) []Server {
 	var servers []Server
-	rows, err := db.Query("SELECT id, hostname, address FROM amx_serverinfo")
+	sqlReq := "SELECT id, hostname, address FROM amx_serverinfo"
+	rows, err := db.Query(sqlReq)
 	if err != nil {
-		log.Fatal(err)
+		logger.Log.Fatalf("(%s): %v", sqlReq, err)
 	}
 	defer rows.Close()
 
@@ -21,7 +22,7 @@ func GetServers(db *sql.DB) []Server {
 		var server Server
 		err = rows.Scan(&server.ID, &server.Name, &server.IP)
 		if err != nil {
-			log.Fatal(err)
+			logger.Log.Fatalf("(GetServers - Scan): %v", err)
 		}
 		servers = append(servers, server)
 	}

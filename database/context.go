@@ -25,7 +25,7 @@ func СtxPrvgCreate(db *sql.DB) error {
 			id INT(11) NOT NULL auto_increment PRIMARY KEY,
 			chat_id INT(11) NULL DEFAULT NULL,
 			privilege_id INT(11) NULL DEFAULT NULL,
-			cost_id INT(11) NULL DEFAULT NULL,
+			day_id INT(11) NULL DEFAULT NULL,
 			steam_id VARCHAR(24) NULL DEFAULT NULL,
 			nick VARCHAR(24) NULL DEFAULT NULL
 		);
@@ -44,7 +44,7 @@ func CtxInitUser(db *sql.DB, chatID int64) error {
 	}
 
 	if count > 0 {
-		sqlReq = "UPDATE tgbot_ctx SET stage = ?, server_id = NULL WHERE chat_id = ?"
+		sqlReq = "UPDATE tgbot_ctx SET stage = ?, server_id = NULL, service = NULL WHERE chat_id = ?"
 		_, err = db.Exec(sqlReq, ServerStg, chatID)
 		if err != nil {
 			return fmt.Errorf("(%s): %v", sqlReq, err)
@@ -92,6 +92,30 @@ func CtxGetUserData(db *sql.DB, chatID int64) (*Context, error) {
 	return &user, nil
 }
 
+func UpdateBacking(db *sql.DB, user *Context) error {
+	var sqlReq string
+
+	switch user.Stage {
+	case ServiceStg:
+		sqlReq = "UPDATE tgbot_ctx SET server_id = NULL WHERE chat_id = ?"
+	case PrivilegeStg:
+		sqlReq = "UPDATE tgbot_ctx SET service = NULL WHERE chat_id = ?"
+	case PrvgDaysStg:
+		sqlReq = "UPDATE tgbot_ctx_privilege SET privilege_id = NULL WHERE chat_id = ?"
+	case PrlgSteamStg:
+		sqlReq = "UPDATE tgbot_ctx_privilege SET day_id = NULL WHERE chat_id = ?"
+	case PrlgNickStg:
+		sqlReq = "UPDATE tgbot_ctx_privilege SET steam_id = NULL WHERE chat_id = ?"
+	}
+
+	_, err := db.Exec(sqlReq, user.ChatID)
+	if err != nil {
+		return fmt.Errorf("(%s): %v", sqlReq, err)
+	}
+
+	return nil
+}
+
 func CtxUpdateUserServer(db *sql.DB, user *Context) error {
 	logger.Log.Debug("(CtxUpdateUserServer)")
 
@@ -116,7 +140,7 @@ func CtxUpdateUserService(db *sql.DB, chatID int64, serviceID int64) error {
 	return nil
 }
 
-func CtxInitUserPrvg(db *sql.DB, chatID int64, privilegeID int64) error {
+func CtxInitUserPrvg(db *sql.DB, chatID int64) error {
 	logger.Log.Debug("(CtxInitUserPrvg)")
 	var count int
 
@@ -126,17 +150,10 @@ func CtxInitUserPrvg(db *sql.DB, chatID int64, privilegeID int64) error {
 		return fmt.Errorf("(%s): %v", sqlReq, err)
 	}
 
-	if count > 0 {
-		sqlReq = "UPDATE tgbot_ctx_privilege SET privilege_id = ? WHERE chat_id = ?"
-		_, err = db.Exec(sqlReq, privilegeID, chatID)
-		if err != nil {
-			return fmt.Errorf("(%s): %v", sqlReq, err)
-		}
-	} else {
-		sqlReq = "INSERT INTO tgbot_ctx_privilege (chat_id, privilege_id) VALUES (?, ?)"
+	if count <= 0 {
+		sqlReq = "INSERT INTO tgbot_ctx_privilege (chat_id) VALUES (?)"
 		_, err = db.Exec(sqlReq,
 			chatID,
-			privilegeID,
 		)
 		if err != nil {
 			return fmt.Errorf("(%s): %v", sqlReq, err)
@@ -150,9 +167,9 @@ func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
 	logger.Log.Debug("(CtxGetUserPrvgData)")
 	var userPrlg ContextPrlg
 
-	row := db.QueryRow("SELECT chat_id, privilege_id, cost_id, steam_id, nick FROM tgbot_ctx_privilege WHERE chat_id = ?", chatID)
+	row := db.QueryRow("SELECT chat_id, privilege_id, day_id, steam_id, nick FROM tgbot_ctx_privilege WHERE chat_id = ?", chatID)
 
-	err := row.Scan(&userPrlg.ChatID, &userPrlg.PrvgID, &userPrlg.CostID, &userPrlg.SteamID, &userPrlg.Nick)
+	err := row.Scan(&userPrlg.ChatID, &userPrlg.PrvgID, &userPrlg.DayID, &userPrlg.SteamID, &userPrlg.Nick)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return userPrlg, fmt.Errorf("user with chat_id %d not found", chatID)
@@ -163,11 +180,23 @@ func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
 	return userPrlg, nil
 }
 
-func CtxUpdateUserPrvgCostID(db *sql.DB, chatID int64, costID int64) error {
-	logger.Log.Debug("(CtxUpdateUserPrvgCostID)")
+func CtxUpdateUserPrvgID(db *sql.DB, chatID int64, privilegeID int64) error {
+	logger.Log.Debug("(CtxUpdateUserPrvgID)")
 
-	sqlReq := "UPDATE tgbot_ctx_privilege SET cost_id = ? WHERE chat_id = ?"
-	_, err := db.Exec(sqlReq, costID, chatID)
+	sqlReq := "UPDATE tgbot_ctx_privilege SET privilege_id = ? WHERE chat_id = ?"
+	_, err := db.Exec(sqlReq, privilegeID, chatID)
+	if err != nil {
+		return fmt.Errorf("(%s): %v", sqlReq, err)
+	}
+
+	return nil
+}
+
+func CtxUpdateUserPrvgDayID(db *sql.DB, chatID int64, dayID int64) error {
+	logger.Log.Debug("(CtxUpdateUserPrvgDayID)")
+
+	sqlReq := "UPDATE tgbot_ctx_privilege SET day_id = ? WHERE chat_id = ?"
+	_, err := db.Exec(sqlReq, dayID, chatID)
 	if err != nil {
 		return fmt.Errorf("(%s): %v", sqlReq, err)
 	}

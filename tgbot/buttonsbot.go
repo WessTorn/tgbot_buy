@@ -9,7 +9,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func GetTeamButtons(bot *tgbotapi.BotAPI, db *sql.DB) tgbotapi.ReplyKeyboardMarkup {
+func GetServerButtons(bot *tgbotapi.BotAPI, db *sql.DB) tgbotapi.ReplyKeyboardMarkup {
 	servers := database.GetServers(db)
 
 	var buttons [][]tgbotapi.KeyboardButton
@@ -54,8 +54,8 @@ func GetPrivilegesButton(bot *tgbotapi.BotAPI) tgbotapi.ReplyKeyboardMarkup {
 
 func GetPrivilegesDaysButton(bot *tgbotapi.BotAPI, privilege get_data.Privilege) tgbotapi.ReplyKeyboardMarkup {
 	var buttons [][]tgbotapi.KeyboardButton
-	for _, cost := range privilege.Cost {
-		text := fmt.Sprintf("%d дней - %d руб", cost.Day, cost.Price)
+	for _, days := range privilege.Days {
+		text := fmt.Sprintf("%d дней - %d руб", days.Day, days.Price)
 		button := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text))
 		buttons = append(buttons, button)
 	}

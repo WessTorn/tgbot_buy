@@ -31,11 +31,16 @@ func HandlerPrivileges(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update,
 
 	privilege, err := get_data.GetPrivilegeFromName(privilegeName)
 	if err != nil {
-		ShowPrivileges(bot, db, chatID)
+		if err.Error() == "PrivilegeNotFound" {
+			err := BadButtonMsg(bot, db, user)
+			if err != nil {
+				logger.Log.Fatalf("(BadButtonMsg) %v", err)
+			}
+		}
 		return
 	}
 
-	err = database.CtxInitUserPrvg(db, chatID, privilege.ID)
+	err = database.CtxUpdateUserPrvgID(db, chatID, privilege.ID)
 	if err != nil {
 		logger.Log.Fatalf("(CtxInitUserPrvg) %v", err)
 	}
@@ -75,16 +80,17 @@ func HandlerPrivilegesDays(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Upd
 		return
 	}
 
-	costID, err := get_data.GetCostIDFromString(privilege, text)
+	dayID, err := get_data.GetDayIDFromString(privilege, text)
 	if err != nil {
-		logger.Log.Debugf("(GetCostIDFromString) User %v", err)
+		// DayIDNotFound
+		logger.Log.Debugf("(GetDayIDFromString) User %v", err)
 		ShowPrivilegesDays(bot, db, chatID, user.Privilege.PrvgID.Int64)
 		return
 	}
 
-	err = database.CtxUpdateUserPrvgCostID(db, chatID, costID)
+	err = database.CtxUpdateUserPrvgDayID(db, chatID, dayID)
 	if err != nil {
-		logger.Log.Fatalf("(CtxUpdateUserPrvgCostID) %v", err)
+		logger.Log.Fatalf("(CtxUpdateUserPrvgDayID) %v", err)
 	}
 
 	ShowSteam(bot, db, chatID)

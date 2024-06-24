@@ -29,7 +29,12 @@ func HandlerService(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, us
 
 	service, err := get_data.GetServiceFromName(serviceName)
 	if err != nil {
-		ShowService(bot, db, chatID)
+		if err.Error() == "ServiceNotFound" {
+			err := BadButtonMsg(bot, db, user)
+			if err != nil {
+				logger.Log.Fatalf("(BadButtonMsg) %v", err)
+			}
+		}
 		return
 	}
 
@@ -40,6 +45,10 @@ func HandlerService(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, us
 
 	switch service.ID {
 	case 1:
+		err = database.CtxInitUserPrvg(db, chatID)
+		if err != nil {
+			logger.Log.Fatalf("(CtxInitUserPrvg) %v", err)
+		}
 		ShowPrivileges(bot, db, chatID)
 	}
 }

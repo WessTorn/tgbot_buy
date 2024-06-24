@@ -16,7 +16,7 @@ func SetAdminServer(db *sql.DB, user *Context) {
 	}
 
 	nowTime := time.Now().Unix()
-	day := get_data.GetDayFromCostID(privelege, user.Privilege.CostID.Int64)
+	day := get_data.GetDayFromDayID(privelege, user.Privilege.DayID.Int64)
 	daysToAdd := day * 24 * 60 * 60
 	futureTime := nowTime + int64(daysToAdd)
 

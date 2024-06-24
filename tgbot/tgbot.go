@@ -33,9 +33,10 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 				continue
 			}
 
-			if user.Stage >= database.PrvgDaysStg && user.Stage <= database.PrlgNickStg {
+			if user.ServiceID.Int64 == 1 {
 				user.Privilege, err = database.CtxGetUserPrvgData(db, chatID)
 				if err != nil {
+					// TODO: Обработать если пропали данные
 					logger.Log.Debugf("(CtxGetUserPrvgData) ERROR: %v", err)
 					ShowPrivileges(bot, db, chatID)
 					continue
@@ -70,6 +71,10 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 func BackButton(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
 	logger.Log.Debugf("(BackButton) ChatID %d, User: %v", update.Message.Chat.ID, user)
 	chatID := update.Message.Chat.ID
+	err := database.UpdateBacking(db, user)
+	if err != nil {
+		logger.Log.Fatalf("(UpdateBacking) %v", err)
+	}
 	switch user.Stage {
 	case database.ServiceStg:
 		ShowServers(bot, db, chatID)

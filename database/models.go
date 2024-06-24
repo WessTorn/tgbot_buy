@@ -17,7 +17,7 @@ type ContextPrlg struct {
 	ID      int
 	ChatID  int64
 	PrvgID  sql.NullInt64
-	CostID  sql.NullInt64
+	DayID   sql.NullInt64
 	SteamID sql.NullString
 	Nick    sql.NullString
 }
