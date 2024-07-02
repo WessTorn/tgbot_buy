@@ -13,7 +13,7 @@ import (
 func main() {
 	config.InitConfig()
 
-	payment.InitYoo()
+	payment.InitYookassaClient()
 
 	logger.InitLogger()
 

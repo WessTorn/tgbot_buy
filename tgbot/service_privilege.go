@@ -154,11 +154,13 @@ func HandlerNick(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user 
 
 	user.Privilege.Nick.String = update.Message.Text
 
-	database.SetAdminServer(db, user)
+	ShowPayment(bot, db, user)
 
-	err = PrivilegeMsg(bot, user.Privilege.ChatID)
-	if err != nil {
-		logger.Log.Fatalf("(PrivilegeMsg) %v", err)
-	}
+	// database.SetAdminServer(db, user)
+
+	// err = PrivilegeMsg(bot, user.Privilege.ChatID)
+	// if err != nil {
+	// 	logger.Log.Fatalf("(PrivilegeMsg) %v", err)
+	// }
 
 }
