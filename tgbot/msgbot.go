@@ -59,6 +59,20 @@ func NickMsg(bot *tgbotapi.BotAPI, chatID int64) error {
 	return err
 }
 
+func YooCreateMsg(bot *tgbotapi.BotAPI, chatID int64, link string) error {
+	text := fmt.Sprintf("Ссылка на оплату (YooMoney):\n%s", link)
+	msg := tgbotapi.NewMessage(chatID, text)
+	_, err := bot.Send(msg)
+	return err
+}
+
+func YooStatusMsg(bot *tgbotapi.BotAPI, chatID int64, status string) error {
+	text := fmt.Sprintf("Статус вашего платежа: %s", status)
+	msg := tgbotapi.NewMessage(chatID, text)
+	_, err := bot.Send(msg)
+	return err
+}
+
 func PrivilegeMsg(bot *tgbotapi.BotAPI, chatID int64) error {
 	msg := tgbotapi.NewMessage(chatID, "Вам выдана привилегия")
 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)

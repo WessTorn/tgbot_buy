@@ -62,6 +62,8 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 				HandlerSteam(bot, db, update)
 			case database.PrlgNickStg:
 				HandlerNick(bot, db, update, user)
+			case database.PayYooStg:
+				HandlerPayment(bot, db, update, user)
 			}
 
 		}
@@ -86,5 +88,8 @@ func BackButton(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *
 		ShowPrivilegesDays(bot, db, chatID, user.Privilege.PrvgID.Int64)
 	case database.PrlgNickStg:
 		ShowSteam(bot, db, chatID)
+	case database.PayYooStg:
+		//CancelPayment(chatID)
+		ShowNick(bot, db, chatID)
 	}
 }

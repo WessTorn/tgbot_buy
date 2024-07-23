@@ -1,6 +1,7 @@
 package payment
 
 import (
+	"errors"
 	"fmt"
 	"tg_cs/logger"
 
@@ -26,7 +27,7 @@ func InitYookassaClient() error {
 	return nil
 }
 
-func CreatePayment() (string, error) {
+func CreatePayment() (string, string, error) {
 	paymentHandler := yookassa.NewPaymentHandler(yooClient)
 	payment, err := paymentHandler.CreatePayment(&yoopayment.Payment{
 		Amount: &yoocommon.Amount{
@@ -42,8 +43,34 @@ func CreatePayment() (string, error) {
 	})
 
 	link, _ := paymentHandler.ParsePaymentLink(payment)
+	payid := payment.ID
 
 	fmt.Println(link)
 
-	return link, err
+	return link, payid, err
+}
+
+func CancelPayment(orderId string) error {
+	paymentHandler := yookassa.NewPaymentHandler(yooClient)
+	payment, _ := paymentHandler.FindPayment(orderId)
+	if payment == nil {
+		fmt.Println("payment not found")
+		return errors.New("payment not found")
+	}
+	_, err := paymentHandler.CancelPayment(payment.ID)
+
+	return err
+}
+
+func GetPayment(orderId string) (string, error) {
+	paymentHandler := yookassa.NewPaymentHandler(yooClient)
+	payment, _ := paymentHandler.FindPayment(orderId)
+	if payment == nil {
+		fmt.Println("payment not found")
+		return "", errors.New("payment not found")
+	}
+
+	fmt.Printf("id: %s \nStatus: %s", payment.ID, string(payment.Status))
+
+	return string(payment.Status), nil
 }
