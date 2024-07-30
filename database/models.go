@@ -11,6 +11,7 @@ const (
 	PrvgDaysStg
 	PrlgSteamStg
 	PrlgNickStg
+	PrlgVerifStg
 	PayYooStg
 	PayYooCheckStg
 )

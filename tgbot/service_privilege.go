@@ -154,13 +154,45 @@ func HandlerNick(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user 
 
 	user.Privilege.Nick.String = update.Message.Text
 
+	ShowVerification(bot, db, user)
+}
+
+func ShowVerification(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
+	chatID := user.ChatID
+	logger.Log.Debugf("(ShowVerification) User %d", chatID)
+
+	err := VerificationMsg(bot, db, user)
+	if err != nil {
+		logger.Log.Fatalf("(VerificationMsg) %v", err)
+	}
+
+	err = database.CtxUpdateStage(db, chatID, database.PrlgVerifStg)
+	if err != nil {
+		logger.Log.Fatalf("(CtxUpdateStage) %v", err)
+	}
+}
+
+func HandlerVerification(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
+	chatID := update.Message.Chat.ID
+	logger.Log.Debugf("(HandlerVerification) User %d", chatID)
+
+	verification := update.Message.Text
+
+	if verification != "Оплатить" {
+		ShowVerification(bot, db, user)
+	}
+
 	ShowPayment(bot, db, user)
 
-	// database.SetAdminServer(db, user)
+}
 
-	// err = PrivilegeMsg(bot, user.Privilege.ChatID)
-	// if err != nil {
-	// 	logger.Log.Fatalf("(PrivilegeMsg) %v", err)
-	// }
+func ShowFinishPrivilege(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
+	//database.SetAdminServer(db, user)
 
+	//TODO: Нормально все завершить.
+
+	err := PrivilegeMsg(bot, user.Privilege.ChatID)
+	if err != nil {
+		logger.Log.Fatalf("(PrivilegeMsg) %v", err)
+	}
 }

@@ -27,11 +27,15 @@ func InitYookassaClient() error {
 	return nil
 }
 
-func CreatePayment() (string, string, error) {
+func CreatePayment(price int, description string) (string, string, error) {
+	logger.Log.Debugf("(CreatePayment) price %d description %s", price, description)
+
+	value := fmt.Sprintf("%d.00", price)
+
 	paymentHandler := yookassa.NewPaymentHandler(yooClient)
 	payment, err := paymentHandler.CreatePayment(&yoopayment.Payment{
 		Amount: &yoocommon.Amount{
-			Value:    "1000.00",
+			Value:    value,
 			Currency: "RUB",
 		},
 		Capture:       true,
@@ -40,15 +44,39 @@ func CreatePayment() (string, string, error) {
 			Type:      "redirect",
 			ReturnURL: "https://t.me/csbotwess_bot",
 		},
-		Description: "Test payment",
+		Description: description,
 	})
 
-	link, _ := paymentHandler.ParsePaymentLink(payment)
+	if err != nil {
+		logger.Log.Fatalf("(CreatePayment) %v", err)
+		return "", "", err
+	}
+
+	link, err := paymentHandler.ParsePaymentLink(payment)
+
+	if err != nil {
+		logger.Log.Fatalf("(ParsePaymentLink) %v", err)
+		return "", "", err
+	}
+
 	payid := payment.ID
 
 	fmt.Println(link)
 
-	return link, payid, err
+	return link, payid, nil
+}
+
+func IsPaymentSuccess(orderId string) bool {
+	status, err := GetPayment(orderId)
+	if err != nil {
+		fmt.Println("Error checking payment status:", err)
+	} else {
+		if status == "succeeded" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func GetPayment(orderId string) (string, error) {

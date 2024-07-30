@@ -66,6 +66,19 @@ func GetPrivilegesDaysButton(bot *tgbotapi.BotAPI, privilege get_data.Privilege)
 	return tgbotapi.NewReplyKeyboard(buttons...)
 }
 
+func GetPaymentButton(bot *tgbotapi.BotAPI) tgbotapi.ReplyKeyboardMarkup {
+	var buttons [][]tgbotapi.KeyboardButton
+
+	text := "Оплатить"
+	button := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text))
+	buttons = append(buttons, button)
+
+	buttonBack := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Вернуться назад"))
+	buttons = append(buttons, buttonBack)
+
+	return tgbotapi.NewReplyKeyboard(buttons...)
+}
+
 func GetBackButton(bot *tgbotapi.BotAPI) tgbotapi.ReplyKeyboardMarkup {
 	button := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Вернуться назад"))
 

@@ -15,11 +15,13 @@ type Privilege struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Flags       string `json:"flags"`
-	Days        []struct {
-		DayID int64 `json:"day_id"`
-		Day   int   `json:"day"`
-		Price int   `json:"price"`
-	} `json:"days"`
+	Days        []Day  `json:"days"`
+}
+
+type Day struct {
+	DayID int64 `json:"day_id"`
+	Day   int   `json:"day"`
+	Price int   `json:"price"`
 }
 
 type Privileges struct {
@@ -107,14 +109,15 @@ func getDayIDFromDay(privilege Privilege, day int) (int64, error) {
 	return 0, errors.New("DayIDNotFound")
 }
 
-func GetDayFromDayID(privilege Privilege, DayID int64) int {
-	for _, days := range privilege.Days {
-		if DayID == days.DayID {
-			return days.Day
+func GetDayFromDayID(privilege Privilege, DayID int64) Day {
+	var out Day
+	for _, day := range privilege.Days {
+		if DayID == day.DayID {
+			out = day
 		}
 	}
 
-	return 0
+	return out
 }
 
 func GetPrivileges() Privileges {

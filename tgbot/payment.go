@@ -2,8 +2,8 @@ package tgbot
 
 import (
 	"database/sql"
-	"fmt"
 	"tg_cs/database"
+	"tg_cs/get_data"
 	"tg_cs/logger"
 	"tg_cs/payment"
 	"time"
@@ -15,17 +15,24 @@ func ShowPayment(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
 	chatID := user.ChatID
 	logger.Log.Debugf("(CreatePayment) User %d", chatID)
 
-	// TODO: Обработать ощибки
-	link, payid, _ := payment.CreatePayment()
+	privelege, err := get_data.GetPrivilegeFromID(user.Privilege.PrvgID.Int64)
+	if err != nil {
+		logger.Log.Fatalf("(GetPrivilegeFromID) %v", err)
+	}
 
-	err := YooCreateMsg(bot, chatID, link)
+	day := get_data.GetDayFromDayID(privelege, user.Privilege.DayID.Int64)
+
+	// TODO: Обработать ощибки
+	link, payid, _ := payment.CreatePayment(day.Price, privelege.Name)
+
+	err = YooCreateMsg(bot, chatID, link)
 	if err != nil {
 		logger.Log.Fatalf("(YooCreateMsg) %v", err)
 	}
 
 	payment.AddPayData(chatID, payid, link)
 
-	go checkPaymentStatus(bot, chatID, payid)
+	go checkPaymentStatus(bot, db, user, payid)
 
 	err = database.CtxUpdateStage(db, chatID, database.PayYooStg)
 	if err != nil {
@@ -50,26 +57,35 @@ func HandlerPayment(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, us
 	}
 }
 
-func checkPaymentStatus(bot *tgbotapi.BotAPI, chatID int64, orderId string) {
-	logger.Log.Debugf("(checkPaymentStatus) orderId %s", orderId)
+func checkPaymentStatus(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context, orderId string) {
+	chatID := user.ChatID
+	logger.Log.Debugf("(checkPaymentStatus) chatID %d", chatID)
 	for {
 		logger.Log.Debugf("(checkPaymentStatus) FOR %s", orderId)
-		// Проверяем статус платежа
-		status, err := payment.GetPayment(orderId)
-		if err != nil {
-			fmt.Println("Error checking payment status:", err)
-		} else {
-			if status == "succeeded" {
-				// Платеж успешно оплачен, выдаем привилегию
-				err = PrivilegeMsg(bot, chatID)
-				if err != nil {
-					logger.Log.Fatalf("(PrivilegeMsg) %v", err)
-				}
-				break
-			}
+
+		if payment.IsPaymentSuccess(orderId) {
+			showSuccessPayment(bot, db, user)
+			break
 		}
 
 		// Ждем 5 секунд перед следующей проверкой
 		time.Sleep(5 * time.Second)
+	}
+}
+
+func showSuccessPayment(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
+	chatID := user.ChatID
+	logger.Log.Debugf("(showSuccessPayment) User %d", chatID)
+
+	logger.Log.Debugf("(showSuccessPayment) User ServiceID id %d", user.ServiceID.Int64)
+
+	err := YooSucceedMsg(bot, chatID)
+	if err != nil {
+		logger.Log.Fatalf("(YooSucceedMsg) %v", err)
+	}
+
+	switch user.ServiceID.Int64 {
+	case 1:
+		ShowFinishPrivilege(bot, db, user)
 	}
 }
