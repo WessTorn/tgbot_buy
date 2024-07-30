@@ -89,7 +89,6 @@ func BackButton(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *
 	case database.PrlgNickStg:
 		ShowSteam(bot, db, chatID)
 	case database.PayYooStg:
-		//CancelPayment(chatID)
 		ShowNick(bot, db, chatID)
 	}
 }

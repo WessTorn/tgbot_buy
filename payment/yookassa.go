@@ -34,6 +34,7 @@ func CreatePayment() (string, string, error) {
 			Value:    "1000.00",
 			Currency: "RUB",
 		},
+		Capture:       true,
 		PaymentMethod: yoopayment.PaymentMethodType("sbp"),
 		Confirmation: yoopayment.Redirect{
 			Type:      "redirect",
@@ -50,19 +51,8 @@ func CreatePayment() (string, string, error) {
 	return link, payid, err
 }
 
-func CancelPayment(orderId string) error {
-	paymentHandler := yookassa.NewPaymentHandler(yooClient)
-	payment, _ := paymentHandler.FindPayment(orderId)
-	if payment == nil {
-		fmt.Println("payment not found")
-		return errors.New("payment not found")
-	}
-	_, err := paymentHandler.CancelPayment(payment.ID)
-
-	return err
-}
-
 func GetPayment(orderId string) (string, error) {
+	logger.Log.Debugf("(GetPayment) orderId %s", orderId)
 	paymentHandler := yookassa.NewPaymentHandler(yooClient)
 	payment, _ := paymentHandler.FindPayment(orderId)
 	if payment == nil {
@@ -70,7 +60,7 @@ func GetPayment(orderId string) (string, error) {
 		return "", errors.New("payment not found")
 	}
 
-	fmt.Printf("id: %s \nStatus: %s", payment.ID, string(payment.Status))
+	logger.Log.Debugf("(GetPayment) FindPayment [id: %s Status: %s]", payment.ID, string(payment.Status))
 
 	return string(payment.Status), nil
 }
