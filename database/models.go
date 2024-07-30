@@ -11,6 +11,8 @@ const (
 	PrvgDaysStg
 	PrlgSteamStg
 	PrlgNickStg
+	PayYooStg
+	PayYooCheckStg
 )
 
 type ContextPrlg struct {

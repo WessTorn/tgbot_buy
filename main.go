@@ -6,11 +6,14 @@ import (
 	"tg_cs/database"
 	"tg_cs/get_data"
 	"tg_cs/logger"
+	"tg_cs/payment"
 	"tg_cs/tgbot"
 )
 
 func main() {
 	config.InitConfig()
+
+	payment.InitYookassaClient()
 
 	logger.InitLogger()
 

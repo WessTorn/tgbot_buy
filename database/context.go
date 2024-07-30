@@ -106,6 +106,8 @@ func UpdateBacking(db *sql.DB, user *Context) error {
 		sqlReq = "UPDATE tgbot_ctx_privilege SET day_id = NULL WHERE chat_id = ?"
 	case PrlgNickStg:
 		sqlReq = "UPDATE tgbot_ctx_privilege SET steam_id = NULL WHERE chat_id = ?"
+	case PayYooStg:
+		sqlReq = "UPDATE tgbot_ctx_privilege SET nick = NULL WHERE chat_id = ?"
 	}
 
 	_, err := db.Exec(sqlReq, user.ChatID)
