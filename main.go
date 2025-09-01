@@ -15,7 +15,7 @@ func main() {
 
 	payment.InitYookassaClient()
 
-	logger.InitLogger()
+	logger.Init("./log/")
 
 	get_data.ReadPrivilege()
 

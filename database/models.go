@@ -38,5 +38,5 @@ type Server struct {
 	ID   int64
 	Name string
 	IP   string
-	Rcon string
+	Rcon sql.NullString
 }

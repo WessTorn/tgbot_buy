@@ -1,13 +1,14 @@
 package game
 
 import (
+	"database/sql"
 	"log"
 	"net"
 	"regexp"
 	"time"
 )
 
-func SendRCON(host string, pass string, rconCommand string) {
+func SendRCON(host string, pass sql.NullString, rconCommand string) {
 	conn, err := net.Dial("udp", host)
 	if err != nil {
 
@@ -43,7 +44,7 @@ func SendRCON(host string, pass string, rconCommand string) {
 		challenge += challengeSplit[i]
 	}
 
-	send = prepareCommand("rcon \"" + challenge + "\" " + pass + " " + rconCommand + "\n")
+	send = prepareCommand("rcon \"" + challenge + "\" " + getPass(pass) + " " + rconCommand + "\n")
 
 	_, err = conn.Write(send)
 	if err != nil {
@@ -58,4 +59,11 @@ func prepareCommand(command string) []byte {
 	sequence = append(sequence, []byte{255, 255, 255, 255}...)
 	sequence = append(sequence, []byte(command)...)
 	return sequence
+}
+
+func getPass(p sql.NullString) string {
+	if p.Valid {
+		return p.String
+	}
+	return "" // или можно вернуть дефолтный пароль, если нужно
 }
