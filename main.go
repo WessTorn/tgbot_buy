@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
 	"tg_cs/config"
 	"tg_cs/database"
 	"tg_cs/get_data"
 	"tg_cs/logger"
+	log "tg_cs/logger"
 	"tg_cs/payment"
 	"tg_cs/tgbot"
 )
@@ -21,34 +21,34 @@ func main() {
 
 	db, err := database.ConnectDB()
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLogger.Fatal(err)
 	}
 	defer db.Close()
 
-	logger.Log.Info("Database connected")
+	log.InfoLogger.Println("Database connected")
 
 	err = database.PingDB(db)
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLogger.Fatal(err)
 	}
 
-	logger.Log.Info("Database ping successful")
+	log.InfoLogger.Println("Database ping successful")
 
 	err = database.СtxCreate(db)
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLogger.Fatal(err)
 	}
 
 	err = database.СtxPrvgCreate(db)
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLogger.Fatal(err)
 	}
 
-	logger.Log.Info("Context created")
+	log.InfoLogger.Println("Context created")
 
 	bot, err := tgbot.InitTGBot()
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLogger.Fatal(err)
 	}
 
 	tgbot.PlayTGBot(bot, db)

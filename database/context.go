@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 )
 
 func СtxCreate(db *sql.DB) error {
@@ -34,7 +34,7 @@ func СtxPrvgCreate(db *sql.DB) error {
 }
 
 func CtxInitUser(db *sql.DB, chatID int64) error {
-	logger.Log.Debug("(CtxInitUser)")
+	log.InfoLogger.Println("(CtxInitUser)")
 	var count int
 
 	sqlReq := "SELECT COUNT(*) FROM tgbot_ctx WHERE chat_id = ?"
@@ -64,7 +64,7 @@ func CtxInitUser(db *sql.DB, chatID int64) error {
 }
 
 func CtxUpdateStage(db *sql.DB, chatID int64, stage Stage) error {
-	logger.Log.Debug("(CtxUpdateStage)")
+	log.InfoLogger.Println("(CtxUpdateStage)")
 
 	sqlReq := "UPDATE tgbot_ctx SET stage = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, stage, chatID)
@@ -76,7 +76,7 @@ func CtxUpdateStage(db *sql.DB, chatID int64, stage Stage) error {
 }
 
 func CtxGetUserData(db *sql.DB, chatID int64) (*Context, error) {
-	logger.Log.Debug("(CtxGetUserData)")
+	log.InfoLogger.Println("(CtxGetUserData)")
 	var user Context
 
 	row := db.QueryRow("SELECT chat_id, stage, server_id, service FROM tgbot_ctx WHERE chat_id = ?", chatID)
@@ -119,7 +119,7 @@ func UpdateBacking(db *sql.DB, user *Context) error {
 }
 
 func CtxUpdateUserServer(db *sql.DB, user *Context) error {
-	logger.Log.Debug("(CtxUpdateUserServer)")
+	log.InfoLogger.Println("(CtxUpdateUserServer)")
 
 	sqlReq := "UPDATE tgbot_ctx SET server_id = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, user.ServerID.Int64, user.ChatID)
@@ -131,7 +131,7 @@ func CtxUpdateUserServer(db *sql.DB, user *Context) error {
 }
 
 func CtxUpdateUserService(db *sql.DB, chatID int64, serviceID int64) error {
-	logger.Log.Debug("(CtxUpdateUserService)")
+	log.InfoLogger.Println("(CtxUpdateUserService)")
 
 	sqlReq := "UPDATE tgbot_ctx SET service = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, serviceID, chatID)
@@ -143,7 +143,7 @@ func CtxUpdateUserService(db *sql.DB, chatID int64, serviceID int64) error {
 }
 
 func CtxInitUserPrvg(db *sql.DB, chatID int64) error {
-	logger.Log.Debug("(CtxInitUserPrvg)")
+	log.InfoLogger.Println("(CtxInitUserPrvg)")
 	var count int
 
 	sqlReq := "SELECT COUNT(*) FROM tgbot_ctx_privilege WHERE chat_id = ?"
@@ -166,7 +166,7 @@ func CtxInitUserPrvg(db *sql.DB, chatID int64) error {
 }
 
 func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
-	logger.Log.Debug("(CtxGetUserPrvgData)")
+	log.InfoLogger.Println("(CtxGetUserPrvgData)")
 	var userPrlg ContextPrlg
 
 	row := db.QueryRow("SELECT chat_id, privilege_id, day_id, steam_id, nick FROM tgbot_ctx_privilege WHERE chat_id = ?", chatID)
@@ -183,7 +183,7 @@ func CtxGetUserPrvgData(db *sql.DB, chatID int64) (ContextPrlg, error) {
 }
 
 func CtxUpdateUserPrvgID(db *sql.DB, chatID int64, privilegeID int64) error {
-	logger.Log.Debug("(CtxUpdateUserPrvgID)")
+	log.InfoLogger.Println("(CtxUpdateUserPrvgID)")
 
 	sqlReq := "UPDATE tgbot_ctx_privilege SET privilege_id = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, privilegeID, chatID)
@@ -195,7 +195,7 @@ func CtxUpdateUserPrvgID(db *sql.DB, chatID int64, privilegeID int64) error {
 }
 
 func CtxUpdateUserPrvgDayID(db *sql.DB, chatID int64, dayID int64) error {
-	logger.Log.Debug("(CtxUpdateUserPrvgDayID)")
+	log.InfoLogger.Println("(CtxUpdateUserPrvgDayID)")
 
 	sqlReq := "UPDATE tgbot_ctx_privilege SET day_id = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, dayID, chatID)
@@ -207,7 +207,7 @@ func CtxUpdateUserPrvgDayID(db *sql.DB, chatID int64, dayID int64) error {
 }
 
 func CtxUpdateUserPrvgSteamID(db *sql.DB, chatID int64, steamID string) error {
-	logger.Log.Debug("(CtxUpdateUserPrvgSteamID)")
+	log.InfoLogger.Println("(CtxUpdateUserPrvgSteamID)")
 
 	sqlReq := "UPDATE tgbot_ctx_privilege SET steam_id = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, steamID, chatID)
@@ -219,7 +219,7 @@ func CtxUpdateUserPrvgSteamID(db *sql.DB, chatID int64, steamID string) error {
 }
 
 func CtxUpdateUserPrvgNick(db *sql.DB, chatID int64, nick string) error {
-	logger.Log.Debug("(CtxUpdateUserPrvgNick)")
+	log.InfoLogger.Println("(CtxUpdateUserPrvgNick)")
 
 	sqlReq := "UPDATE tgbot_ctx_privilege SET nick = ? WHERE chat_id = ?"
 	_, err := db.Exec(sqlReq, nick, chatID)

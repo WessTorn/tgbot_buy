@@ -3,7 +3,7 @@ package payment
 import (
 	"errors"
 	"fmt"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 
 	"github.com/rvinnie/yookassa-sdk-go/yookassa"
 	yoocommon "github.com/rvinnie/yookassa-sdk-go/yookassa/common"
@@ -22,13 +22,13 @@ func InitYookassaClient() error {
 	fmt.Println(settings)
 
 	if settings == nil {
-		logger.Log.Fatalf("Bad yookassa")
+		log.ErrorLogger.Fatal("Bad yookassa")
 	}
 	return nil
 }
 
 func CreatePayment(price int, description string) (string, string, error) {
-	logger.Log.Debugf("(CreatePayment) price %d description %s", price, description)
+	log.InfoLogger.Printf("(CreatePayment) price %d description %s", price, description)
 
 	value := fmt.Sprintf("%d.00", price)
 
@@ -48,14 +48,14 @@ func CreatePayment(price int, description string) (string, string, error) {
 	})
 
 	if err != nil {
-		logger.Log.Fatalf("(CreatePayment) %v", err)
+		log.ErrorLogger.Fatalf("(CreatePayment) %v", err)
 		return "", "", err
 	}
 
 	link, err := paymentHandler.ParsePaymentLink(payment)
 
 	if err != nil {
-		logger.Log.Fatalf("(ParsePaymentLink) %v", err)
+		log.ErrorLogger.Fatalf("(ParsePaymentLink) %v", err)
 		return "", "", err
 	}
 
@@ -80,7 +80,7 @@ func IsPaymentSuccess(orderId string) bool {
 }
 
 func GetPayment(orderId string) (string, error) {
-	logger.Log.Debugf("(GetPayment) orderId %s", orderId)
+	log.InfoLogger.Printf("(GetPayment) orderId %s", orderId)
 	paymentHandler := yookassa.NewPaymentHandler(yooClient)
 	payment, _ := paymentHandler.FindPayment(orderId)
 	if payment == nil {
@@ -88,7 +88,7 @@ func GetPayment(orderId string) (string, error) {
 		return "", errors.New("payment not found")
 	}
 
-	logger.Log.Debugf("(GetPayment) FindPayment [id: %s Status: %s]", payment.ID, string(payment.Status))
+	log.InfoLogger.Printf("(GetPayment) FindPayment [id: %s Status: %s]", payment.ID, string(payment.Status))
 
 	return string(payment.Status), nil
 }

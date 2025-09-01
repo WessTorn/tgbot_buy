@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"tg_cs/config"
 	"tg_cs/database"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -18,7 +18,7 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 	for update := range bot.GetUpdatesChan(updateConfig) {
 		if update.Message != nil {
 			chatID := update.Message.Chat.ID
-			logger.Log.Infof("(BOT) User %d set message: %v", chatID, update.Message.Text)
+			log.InfoLogger.Printf("(BOT) User %d set message: %v", chatID, update.Message.Text)
 
 			if update.Message.Text == "/start" {
 				ShowServersWelcome(bot, db, chatID)
@@ -28,7 +28,7 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 			var user *database.Context
 			user, err := database.CtxGetUserData(db, chatID)
 			if err != nil {
-				logger.Log.Debugf("(CtxGetUserData) ERROR: %v", err)
+				log.InfoLogger.Printf("(CtxGetUserData) ERROR: %v", err)
 				ShowServersWelcome(bot, db, chatID)
 				continue
 			}
@@ -37,7 +37,7 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 				user.Privilege, err = database.CtxGetUserPrvgData(db, chatID)
 				if err != nil {
 					// TODO: Обработать если пропали данные
-					logger.Log.Debugf("(CtxGetUserPrvgData) ERROR: %v", err)
+					log.InfoLogger.Printf("(CtxGetUserPrvgData) ERROR: %v", err)
 					ShowPrivileges(bot, db, chatID)
 					continue
 				}
@@ -73,11 +73,11 @@ func PlayTGBot(bot *tgbotapi.BotAPI, db *sql.DB) {
 }
 
 func BackButton(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("(BackButton) ChatID %d, User: %v", update.Message.Chat.ID, user)
+	log.InfoLogger.Printf("(BackButton) ChatID %d, User: %v", update.Message.Chat.ID, user)
 	chatID := update.Message.Chat.ID
 	err := database.UpdateBacking(db, user)
 	if err != nil {
-		logger.Log.Fatalf("(UpdateBacking) %v", err)
+		log.ErrorLogger.Fatalf("(UpdateBacking) %v", err)
 	}
 	switch user.Stage {
 	case database.ServiceStg:

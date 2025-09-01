@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 )
 
 type Privilege struct {
@@ -33,13 +33,13 @@ var privileges Privileges
 func ReadPrivilege() {
 	data, err := os.ReadFile("privileges.json")
 	if err != nil {
-		logger.Log.Fatalf("(ReadFile) %v", err)
+		log.ErrorLogger.Fatalf("(ReadFile) %v", err)
 		return
 	}
 
 	err = json.Unmarshal(data, &privileges) // TODO: Проверить айди элементов
 	if err != nil {
-		logger.Log.Fatalf("(Unmarshal) %v", err)
+		log.ErrorLogger.Fatalf("(Unmarshal) %v", err)
 		return
 	}
 }

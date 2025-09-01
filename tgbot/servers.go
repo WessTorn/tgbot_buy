@@ -3,41 +3,41 @@ package tgbot
 import (
 	"database/sql"
 	"tg_cs/database"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func ShowServersWelcome(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
-	logger.Log.Debugf("(ShowServersWelcome) User %d", chatID)
+	log.InfoLogger.Printf("(ShowServersWelcome) User %d", chatID)
 	err := WelcomeMsg(bot, db, chatID)
 	if err != nil {
-		logger.Log.Fatalf("(WelcomeMsg) %v", err)
+		log.ErrorLogger.Fatalf("(WelcomeMsg) %v", err)
 	}
 
 	err = database.CtxInitUser(db, chatID)
 	if err != nil {
-		logger.Log.Fatalf("(CtxInitUser) %v", err)
+		log.ErrorLogger.Fatalf("(CtxInitUser) %v", err)
 	}
 
 	ShowServers(bot, db, chatID)
 }
 
 func ShowServers(bot *tgbotapi.BotAPI, db *sql.DB, chatID int64) {
-	logger.Log.Debugf("(ShowServers) User %d", chatID)
+	log.InfoLogger.Printf("(ShowServers) User %d", chatID)
 	err := ServersMsg(bot, db, chatID)
 	if err != nil {
-		logger.Log.Fatalf("(ServersMsg) %v", err)
+		log.ErrorLogger.Fatalf("(ServersMsg) %v", err)
 	}
 
 	err = database.CtxUpdateStage(db, chatID, database.ServerStg)
 	if err != nil {
-		logger.Log.Fatalf("(CtxUpdateStage) %v", err)
+		log.ErrorLogger.Fatalf("(CtxUpdateStage) %v", err)
 	}
 }
 
 func HandlerServers(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
-	logger.Log.Debugf("(HandlerServersMenu) User %d", update.Message.Chat.ID)
+	log.InfoLogger.Printf("(HandlerServersMenu) User %d", update.Message.Chat.ID)
 
 	chatID := update.Message.Chat.ID
 	serverName := update.Message.Text
@@ -47,7 +47,7 @@ func HandlerServers(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, us
 		if err.Error() == "ServerNotFound" {
 			err := BadButtonMsg(bot, db, user)
 			if err != nil {
-				logger.Log.Fatalf("(BadButtonMsg) %v", err)
+				log.ErrorLogger.Fatalf("(BadButtonMsg) %v", err)
 			}
 		}
 		return
@@ -58,7 +58,7 @@ func HandlerServers(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, us
 
 	err = database.CtxUpdateUserServer(db, user)
 	if err != nil {
-		logger.Log.Fatalf("(CtxUpdateUserServer) %v", err)
+		log.ErrorLogger.Fatalf("(CtxUpdateUserServer) %v", err)
 	}
 
 	ShowService(bot, db, chatID)

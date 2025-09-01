@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"tg_cs/database"
 	"tg_cs/get_data"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 	"tg_cs/payment"
 	"time"
 
@@ -13,11 +13,11 @@ import (
 
 func ShowPayment(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
 	chatID := user.ChatID
-	logger.Log.Debugf("(CreatePayment) User %d", chatID)
+	log.InfoLogger.Printf("(CreatePayment) User %d", chatID)
 
 	privelege, err := get_data.GetPrivilegeFromID(user.Privilege.PrvgID.Int64)
 	if err != nil {
-		logger.Log.Fatalf("(GetPrivilegeFromID) %v", err)
+		log.ErrorLogger.Fatalf("(GetPrivilegeFromID) %v", err)
 	}
 
 	day := get_data.GetDayFromDayID(privelege, user.Privilege.DayID.Int64)
@@ -27,7 +27,7 @@ func ShowPayment(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
 
 	err = YooCreateMsg(bot, chatID, link)
 	if err != nil {
-		logger.Log.Fatalf("(YooCreateMsg) %v", err)
+		log.ErrorLogger.Fatalf("(YooCreateMsg) %v", err)
 	}
 
 	payment.AddPayData(chatID, payid, link)
@@ -36,32 +36,32 @@ func ShowPayment(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
 
 	err = database.CtxUpdateStage(db, chatID, database.PayYooStg)
 	if err != nil {
-		logger.Log.Fatalf("(CtxUpdateStage) %v", err)
+		log.ErrorLogger.Fatalf("(CtxUpdateStage) %v", err)
 	}
 }
 
 func HandlerPayment(bot *tgbotapi.BotAPI, db *sql.DB, update tgbotapi.Update, user *database.Context) {
 	chatID := update.Message.Chat.ID
-	logger.Log.Debugf("(HandlerPayment) User %d", chatID)
+	log.InfoLogger.Printf("(HandlerPayment) User %d", chatID)
 
 	payID, err := payment.GetPayIDFromChatID(chatID)
 	if err != nil {
-		logger.Log.Fatalf("(GetPayIDFromChatID) %v", err)
+		log.ErrorLogger.Fatalf("(GetPayIDFromChatID) %v", err)
 	}
 
 	status, err := payment.GetPayment(payID)
 
 	err = YooStatusMsg(bot, chatID, status)
 	if err != nil {
-		logger.Log.Fatalf("(YooStatusMsg) %v", err)
+		log.ErrorLogger.Fatalf("(YooStatusMsg) %v", err)
 	}
 }
 
 func checkPaymentStatus(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context, orderId string) {
 	chatID := user.ChatID
-	logger.Log.Debugf("(checkPaymentStatus) chatID %d", chatID)
+	log.InfoLogger.Printf("(checkPaymentStatus) chatID %d", chatID)
 	for {
-		logger.Log.Debugf("(checkPaymentStatus) FOR %s", orderId)
+		log.InfoLogger.Printf("(checkPaymentStatus) FOR %s", orderId)
 
 		if payment.IsPaymentSuccess(orderId) {
 			showSuccessPayment(bot, db, user)
@@ -75,13 +75,13 @@ func checkPaymentStatus(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context
 
 func showSuccessPayment(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) {
 	chatID := user.ChatID
-	logger.Log.Debugf("(showSuccessPayment) User %d", chatID)
+	log.InfoLogger.Printf("(showSuccessPayment) User %d", chatID)
 
-	logger.Log.Debugf("(showSuccessPayment) User ServiceID id %d", user.ServiceID.Int64)
+	log.InfoLogger.Printf("(showSuccessPayment) User ServiceID id %d", user.ServiceID.Int64)
 
 	err := YooSucceedMsg(bot, chatID)
 	if err != nil {
-		logger.Log.Fatalf("(YooSucceedMsg) %v", err)
+		log.ErrorLogger.Fatalf("(YooSucceedMsg) %v", err)
 	}
 
 	switch user.ServiceID.Int64 {

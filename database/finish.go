@@ -2,17 +2,16 @@ package database
 
 import (
 	"database/sql"
-	"log"
 	"tg_cs/game"
 	"tg_cs/get_data"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 	"time"
 )
 
 func SetAdminServer(db *sql.DB, user *Context) {
 	privelege, err := get_data.GetPrivilegeFromID(user.Privilege.PrvgID.Int64)
 	if err != nil {
-		logger.Log.Fatalf("(GetPrivilegeFromID) %v", err)
+		log.ErrorLogger.Fatalf("(GetPrivilegeFromID) %v", err)
 	}
 
 	nowTime := time.Now().Unix()
@@ -34,7 +33,7 @@ func SetAdminServer(db *sql.DB, user *Context) {
 		day,
 	)
 	if err != nil {
-		log.Fatalf("(%s): %v", sqlReq, err)
+		log.ErrorLogger.Fatalf("(%s): %v", sqlReq, err)
 	}
 
 	adminID := GetAdminID(db, user)
@@ -45,7 +44,7 @@ func SetAdminServer(db *sql.DB, user *Context) {
 		user.ServerID,
 	)
 	if err != nil {
-		log.Fatalf("(%s): %v", sqlReq, err)
+		log.ErrorLogger.Fatalf("(%s): %v", sqlReq, err)
 	}
 
 	server := GetServerFromId(db, int(user.ServerID.Int64))
@@ -57,14 +56,14 @@ func GetAdminID(db *sql.DB, user *Context) int {
 	var adminID int
 	rows, err := db.Query("SELECT id FROM amx_amxadmins WHERE steamid = ?", user.Privilege.SteamID.String)
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLogger.Fatal(err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&adminID)
 		if err != nil {
-			log.Fatal(err)
+			log.ErrorLogger.Fatal(err)
 		}
 	}
 

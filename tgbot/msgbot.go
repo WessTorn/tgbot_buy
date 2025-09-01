@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"tg_cs/database"
 	"tg_cs/get_data"
-	"tg_cs/logger"
+	log "tg_cs/logger"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -67,7 +67,7 @@ func VerificationMsg(bot *tgbotapi.BotAPI, db *sql.DB, user *database.Context) e
 
 	privelege, err := get_data.GetPrivilegeFromID(user.Privilege.PrvgID.Int64)
 	if err != nil {
-		logger.Log.Fatalf("(GetPrivilegeFromID) %v", err)
+		log.ErrorLogger.Fatalf("(GetPrivilegeFromID) %v", err)
 	}
 
 	day := get_data.GetDayFromDayID(privelege, user.Privilege.DayID.Int64)
